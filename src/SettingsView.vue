@@ -30,6 +30,7 @@
 import CommonSettings from './CommonSettings.vue'
 import GroupSettings  from './GroupSettings.vue'
 
+const advancedKeyValue = 'fah-settings-unlocked'
 
 function copy_keys(config, keys) {
   let copy = {}
@@ -269,18 +270,18 @@ export default {
       delete this.config.groups[this.group]
       this.group = ''
     },
-
-
+    lock() {
+      this.unlocked = false
+      this.$util.store_bool(advancedKeyValue, false)
+    },
     async unlock() {
       let result = await this.$root.message(
         'confirm', 'Unlock Advanced Settings?', '<p>Advanced settings are ' +
           'mainly used for testing Folding@home.</p><p>Are you sure you ' +
           'want to unlock advanced settings?</p>', 'Cancel Unlock')
-
-      if (result != 'unlock') return
-
+      if (result != 'unlock') return;
       this.unlocked = true
-      this.$util.store_bool('fah-settings-unlocked', true)
+      this.$util.store_bool(advancedKeyValue, true)
     }
   }
 }
@@ -359,8 +360,8 @@ Dialog.new-group-dialog(ref="new_group_dialog", buttons="Create")
           :gpus="gpus", :advanced="advanced", :version="version")
 
   .actions
-    Button.button-icon(v-if="!advanced && connected", @click="unlock",
-      icon="lock", title="Unlock advanced settings")
+    Button.button-icon(v-if="connected", @click="advanced ? lock() : unlock()",
+    :icon="(advanced?'un':'')+'lock'", title="Unlock advanced settings")
 </template>
 
 <style lang="stylus">
